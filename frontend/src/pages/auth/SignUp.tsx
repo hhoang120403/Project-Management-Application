@@ -20,11 +20,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useSignUpMutation } from '@/hooks/use-auth';
+import { toast } from 'sonner';
 
-type SignUpFormData = z.infer<typeof signUpSchema>;
+export type SignUpFormData = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -35,8 +39,26 @@ const SignUp = () => {
     },
   });
 
+  const { mutate, isPending } = useSignUpMutation();
+
   const handleOnSubmit = (values: SignUpFormData) => {
-    console.log(values);
+    mutate(values, {
+      onSuccess: () => {
+        toast.success('Email Verification Required', {
+          description:
+            "Please check your email for a verification link. If you don't see it, please check your spam folder.",
+        });
+
+        form.reset();
+        navigate('/sign-in');
+      },
+      onError(error: any) {
+        const errorMessage =
+          error.response?.data?.message || 'An error occurred';
+        console.log(error);
+        toast.error(errorMessage);
+      },
+    });
   };
 
   return (
@@ -125,8 +147,8 @@ const SignUp = () => {
                 )}
               />
 
-              <Button type='submit' className='w-full'>
-                Sign up
+              <Button type='submit' className='w-full' disabled={isPending}>
+                {isPending ? 'Signing up...' : 'Sign-up'}
               </Button>
             </form>
           </Form>

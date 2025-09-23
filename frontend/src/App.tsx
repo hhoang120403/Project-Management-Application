@@ -6,6 +6,8 @@ import SignUp from './pages/auth/SignUp';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import VerifyEmail from './pages/auth/VerifyEmail';
+import DashBoardLayout from './pages/dashboard/DashBoardLayout';
+import DashBoard from './pages/dashboard/DashBoard';
 
 const App = () => {
   return (
@@ -17,6 +19,9 @@ const App = () => {
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='/reset-password' element={<ResetPassword />} />
         <Route path='/verify-email' element={<VerifyEmail />} />
+      </Route>
+      <Route path='/dashboard' element={<DashBoardLayout />}>
+        <Route index element={<DashBoard />} />
       </Route>
     </Routes>
   );

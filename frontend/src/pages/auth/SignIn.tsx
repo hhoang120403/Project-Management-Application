@@ -20,11 +20,20 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { useLoginMutation } from '@/hooks/use-auth';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { login } from '@/store/slices/authSlice';
+import { useAuth } from '@/provider/authContext';
 
 type SignInFormData = z.infer<typeof signInSchema>;
 
 const SignIn = () => {
+  const navigate = useNavigate();
+
+  const { login } = useAuth();
+
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -33,8 +42,23 @@ const SignIn = () => {
     },
   });
 
+  const { mutate, isPending } = useLoginMutation();
+
   const handleOnSubmit = (values: SignInFormData) => {
-    console.log(values);
+    mutate(values, {
+      onSuccess: (data) => {
+        login(data);
+        console.log(data);
+        toast.success('Login successfully');
+        navigate('/dashboard');
+      },
+      onError: (error: any) => {
+        const errorMessage =
+          error.response?.data?.message || 'An error occurred';
+        console.log(error);
+        toast.error(errorMessage);
+      },
+    });
   };
 
   return (
@@ -96,8 +120,12 @@ const SignIn = () => {
                 )}
               />
 
-              <Button type='submit' className='w-full'>
-                Sign in
+              <Button type='submit' className='w-full' disabled={isPending}>
+                {isPending ? (
+                  <Loader2 className='w-4 h-4 animate-spin mr-2' />
+                ) : (
+                  'Sign in'
+                )}
               </Button>
             </form>
           </Form>
